@@ -28,7 +28,6 @@ func merge(cur, patch *lazyNode, mergeMerge bool) *lazyNode {
 
 func mergeDocs(doc, patch *partialDoc, mergeMerge bool) {
 	for k, v := range *patch {
-		k := decodePatchKey(k)
 		if v == nil {
 			if mergeMerge {
 				(*doc)[k] = nil
@@ -250,7 +249,7 @@ func matchesValue(av, bv interface{}) bool {
 func getDiff(a, b map[string]interface{}) (map[string]interface{}, error) {
 	into := map[string]interface{}{}
 	for key, bv := range b {
-		escapedKey := encodePatchKey(key)
+		escapedKey := key
 		av, ok := a[key]
 		// value was added
 		if !ok {
