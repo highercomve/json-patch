@@ -95,15 +95,27 @@ var errBadJSONPatch = fmt.Errorf("Invalid JSON Patch")
 // applying this resulting merged merge patch to a document yields the same
 // as merging each merge patch to the document in succession.
 func MergeMergePatches(patch1Data, patch2Data []byte) ([]byte, error) {
-	return doMergePatch(patch1Data, patch2Data, true)
+	return doMergePatch(patch1Data, patch2Data, true, "", "")
 }
 
 // MergePatch merges the patchData into the docData.
 func MergePatch(docData, patchData []byte) ([]byte, error) {
-	return doMergePatch(docData, patchData, false)
+	return doMergePatch(docData, patchData, false, "", "")
 }
 
-func doMergePatch(docData, patchData []byte, mergeMerge bool) ([]byte, error) {
+// MergeMergePatches merges two merge patches together, such that
+// applying this resulting merged merge patch to a document yields the same
+// as merging each merge patch to the document in succession.
+func MergeMergePatchesIndent(patch1Data, patch2Data []byte, prefix string, indent string) ([]byte, error) {
+	return doMergePatch(patch1Data, patch2Data, true, "", "")
+}
+
+// MergePatch merges the patchData into the docData.
+func MergePatchIndent(docData, patchData []byte, prefix string, indent string) ([]byte, error) {
+	return doMergePatch(docData, patchData, false, "", "")
+}
+
+func doMergePatch(docData, patchData []byte, mergeMerge bool, prefix string, indent string) ([]byte, error) {
 	doc := &partialDoc{}
 
 	docErr := json.Unmarshal(docData, doc)
@@ -146,7 +158,7 @@ func doMergePatch(docData, patchData []byte, mergeMerge bool) ([]byte, error) {
 
 			pruneAryNulls(patchAry)
 
-			out, patchErr := json.Marshal(patchAry)
+			out, patchErr := json.MarshalIndent(patchAry, prefix, indent)
 
 			if patchErr != nil {
 				return nil, errBadJSONPatch
@@ -158,7 +170,7 @@ func doMergePatch(docData, patchData []byte, mergeMerge bool) ([]byte, error) {
 		mergeDocs(doc, patch, mergeMerge)
 	}
 
-	return json.Marshal(doc)
+	return json.MarshalIndent(doc, prefix, indent)
 }
 
 // CreateMergePatch creates a merge patch as specified in http://tools.ietf.org/html/draft-ietf-appsawg-json-merge-patch-07
