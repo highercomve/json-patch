@@ -20,8 +20,8 @@ func compareJSON(a, b string) bool {
 	// return Equal([]byte(a), []byte(b))
 
 	var objA, objB map[string]interface{}
-	json.Unmarshal([]byte(a), &objA)
-	json.Unmarshal([]byte(b), &objB)
+	unmarshal([]byte(a), &objA)
+	unmarshal([]byte(b), &objB)
 
 	// fmt.Printf("Comparing %#v\nagainst %#v\n", objA, objB)
 	return reflect.DeepEqual(objA, objB)
