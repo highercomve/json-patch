@@ -1,11 +1,23 @@
 package jsonpatch
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
 )
+
+func unmarshal(data []byte, v interface{}) error {
+	decoder := json.NewDecoder(bytes.NewBuffer(data))
+	decoder.UseNumber()
+
+	if err := decoder.Decode(v); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func merge(cur, patch *lazyNode, mergeMerge bool) *lazyNode {
 	curDoc, err := cur.intoDoc()
@@ -118,11 +130,11 @@ func MergePatchIndent(docData, patchData []byte, prefix string, indent string) (
 func doMergePatch(docData, patchData []byte, mergeMerge bool, prefix string, indent string) ([]byte, error) {
 	doc := &partialDoc{}
 
-	docErr := json.Unmarshal(docData, doc)
+	docErr := unmarshal(docData, doc)
 
 	patch := &partialDoc{}
 
-	patchErr := json.Unmarshal(patchData, patch)
+	patchErr := unmarshal(patchData, patch)
 
 	if _, ok := docErr.(*json.SyntaxError); ok {
 		return nil, errBadJSONDoc
@@ -150,7 +162,7 @@ func doMergePatch(docData, patchData []byte, mergeMerge bool, prefix string, ind
 			}
 		} else {
 			patchAry := &partialArray{}
-			patchErr = json.Unmarshal(patchData, patchAry)
+			patchErr = unmarshal(patchData, patchAry)
 
 			if patchErr != nil {
 				return nil, errBadJSONPatch
@@ -182,11 +194,11 @@ func doMergePatch(docData, patchData []byte, mergeMerge bool, prefix string, ind
 func CreateMergePatch(a, b []byte) ([]byte, error) {
 	aI := map[string]interface{}{}
 	bI := map[string]interface{}{}
-	err := json.Unmarshal(a, &aI)
+	err := unmarshal(a, &aI)
 	if err != nil {
 		return nil, errBadJSONDoc
 	}
-	err = json.Unmarshal(b, &bI)
+	err = unmarshal(b, &bI)
 	if err != nil {
 		return nil, errBadJSONDoc
 	}
@@ -285,7 +297,7 @@ func getDiff(a, b map[string]interface{}) (map[string]interface{}, error) {
 			if len(dst) > 0 {
 				into[escapedKey] = dst
 			}
-		case string, float64, bool:
+		case string, float64, bool, json.Number:
 			if !matchesValue(av, bv) {
 				into[escapedKey] = bv
 			}

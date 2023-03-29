@@ -66,7 +66,7 @@ func (n *lazyNode) intoDoc() (*partialDoc, error) {
 		return &n.doc, nil
 	}
 
-	err := json.Unmarshal(*n.raw, &n.doc)
+	err := unmarshal(*n.raw, &n.doc)
 
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (n *lazyNode) intoAry() (*partialArray, error) {
 		return &n.ary, nil
 	}
 
-	err := json.Unmarshal(*n.raw, &n.ary)
+	err := unmarshal(*n.raw, &n.ary)
 
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (n *lazyNode) compact() []byte {
 }
 
 func (n *lazyNode) tryDoc() bool {
-	err := json.Unmarshal(*n.raw, &n.doc)
+	err := unmarshal(*n.raw, &n.doc)
 
 	if err != nil {
 		return false
@@ -115,7 +115,7 @@ func (n *lazyNode) tryDoc() bool {
 }
 
 func (n *lazyNode) tryAry() bool {
-	err := json.Unmarshal(*n.raw, &n.ary)
+	err := unmarshal(*n.raw, &n.ary)
 
 	if err != nil {
 		return false
@@ -187,7 +187,7 @@ func (o operation) kind() string {
 	if obj, ok := o["op"]; ok {
 		var op string
 
-		err := json.Unmarshal(*obj, &op)
+		err := unmarshal(*obj, &op)
 
 		if err != nil {
 			return "unknown"
@@ -203,7 +203,7 @@ func (o operation) path() string {
 	if obj, ok := o["path"]; ok {
 		var op string
 
-		err := json.Unmarshal(*obj, &op)
+		err := unmarshal(*obj, &op)
 
 		if err != nil {
 			return "unknown"
@@ -219,7 +219,7 @@ func (o operation) from() string {
 	if obj, ok := o["from"]; ok {
 		var op string
 
-		err := json.Unmarshal(*obj, &op)
+		err := unmarshal(*obj, &op)
 
 		if err != nil {
 			return "unknown"
@@ -525,7 +525,7 @@ func Equal(a, b []byte) bool {
 func DecodePatch(buf []byte) (Patch, error) {
 	var p Patch
 
-	err := json.Unmarshal(buf, &p)
+	err := unmarshal(buf, &p)
 
 	if err != nil {
 		return nil, err
@@ -550,7 +550,7 @@ func (p Patch) ApplyIndent(doc []byte, indent string) ([]byte, error) {
 		pd = &partialDoc{}
 	}
 
-	err := json.Unmarshal(doc, pd)
+	err := unmarshal(doc, pd)
 
 	if err != nil {
 		return nil, err
