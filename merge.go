@@ -244,6 +244,11 @@ func matchesValue(av, bv interface{}) bool {
 		if bt == at {
 			return true
 		}
+	case json.Number:
+		bt := bv.(json.Number)
+		if bt == at {
+			return true
+		}
 	case bool:
 		bt := bv.(bool)
 		if bt == at {
